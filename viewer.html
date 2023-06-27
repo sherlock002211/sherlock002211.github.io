@@ -1,32 +1,58 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="UTF-8">
-  <title>GLB加载示例</title>
-</head>
-<body>
-  <iframe src="http://gltf.bimant.com/" style="width: 100%; height: 100%; border: none;"></iframe>
-  
-  <script>
-    window.addEventListener('DOMContentLoaded', function() {
-      var iframe = document.querySelector('iframe');
-      iframe.addEventListener('load', function() {
-        var glbUrl = 'https://sherlock002211.github.io/test.glb';
-        var script = document.createElement('script');
-        script.src = 'https://raw.githack.com/mrdoob/three.js/r132/examples/js/loaders/GLTFLoader.js';
-        script.onload = function() {
-          var loader = new THREE.GLTFLoader();
-          loader.load(glbUrl, function(gltf) {
-            var scene = gltf.scene;
-            var iframeWindow = iframe.contentWindow;
-            var iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
-            iframeWindow.THREE = THREE;
-            iframeDocument.body.appendChild(scene);
-          });
-        };
-        document.head.appendChild(script);
+  <head>
+    <title>GLTF Viewer</title>
+    <script src="https://cdn.jsdelivr.net/npm/babylonjs/babylon.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/babylonjs-loaders/babylonjs.loaders.min.js"></script>
+  </head>
+  <body>
+    <canvas id="renderCanvas"></canvas>
+
+    <script>
+      // 创建场景对象
+      var canvas = document.getElementById("renderCanvas");
+      var engine = new BABYLON.Engine(canvas, true);
+      var scene = new BABYLON.Scene(engine);
+
+      // 创建相机
+      var camera = new BABYLON.ArcRotateCamera(
+        "Camera",
+        0,
+        0,
+        10,
+        new BABYLON.Vector3(0, 0, 0),
+        scene
+      );
+      camera.attachControl(canvas, true);
+
+      // 创建光源
+      var light = new BABYLON.HemisphericLight(
+        "light1",
+        new BABYLON.Vector3(0, 1, 0),
+        scene
+      );
+
+      // 加载GLB文件
+      BABYLON.SceneLoader.ImportMesh(
+        "",
+        "https://sherlock002211.github.io/",
+        "test.glb",
+        scene,
+        function (meshes) {
+          // GLB文件加载完成后的回调函数
+          console.log("GLB文件加载成功！");
+        }
+      );
+
+      // 渲染循环
+      engine.runRenderLoop(function () {
+        scene.render();
       });
-    });
-  </script>
-</body>
+
+      // 处理窗口大小变化
+      window.addEventListener("resize", function () {
+        engine.resize();
+      });
+    </script>
+  </body>
 </html>
