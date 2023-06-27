@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>GLB Viewer</title>
+    <title>GLB Preview</title>
     <style>
       body {
         margin: 0;
@@ -12,6 +12,7 @@
   </head>
   <body>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script>
+    <script src="https://cdn.rawgit.com/mrdoob/three.js/master/examples/js/loaders/GLTFLoader.js"></script>
     <script>
       // 创建场景
       const scene = new THREE.Scene();
@@ -40,8 +41,9 @@
 
       // 使用GLTFLoader加载GLB文件
       const loader = new THREE.GLTFLoader();
+      const glbURL = 'https://sherlock002211.github.io/test.glb';
       loader.load(
-        'https://sherlock002211.github.io/test.glb',
+        glbURL,
         function (gltf) {
           scene.add(gltf.scene);
         },
