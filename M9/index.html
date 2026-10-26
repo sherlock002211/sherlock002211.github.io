@@ -1,0 +1,2377 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>M9英语练习</title>
+<style>
+:root{font-family:"Segoe UI","Microsoft YaHei",sans-serif;color:#222;background:#f4f6f8}
+body{margin:0;font-size:14px}
+header{background:#20344b;color:#fff;padding:10px 18px}
+header h2{margin:0;font-size:18px}
+header .sub{opacity:.8;margin-top:2px;font-size:12px}
+main{max-width:1080px;margin:12px auto;padding:0 10px}
+.panel{background:#fff;border:1px solid #dfe4ea;border-radius:8px;padding:10px 12px;margin-bottom:10px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button,.filebtn,select,input{font:inherit;font-size:13px;padding:6px 10px;border:1px solid #cbd3dc;border-radius:6px;background:#fff;line-height:1.3}
+button{cursor:pointer}
+button.primary{background:#245b8f;color:#fff;border-color:#245b8f}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.ghost{background:#f7f9fb}
+#transcript{white-space:pre-wrap;line-height:1.55;background:#f7f9fb;border-radius:6px;padding:10px;min-height:50px;font-size:13px}
+.question-block{border:1px solid #e0e6ed;border-radius:8px;padding:10px 12px;margin-bottom:10px;background:#fcfdff}
+.question-block:last-child{margin-bottom:0}
+.q-num{font-weight:700;color:#245b8f;margin-bottom:4px;font-size:13px}
+.q-text{font-weight:600;line-height:1.5;margin-bottom:6px;font-size:14px}
+.option{display:block;width:100%;text-align:left;margin:4px 0;padding:7px 10px;border:1px solid #d4dbe3;border-radius:6px;background:#fff;font-size:13px;line-height:1.45}
+.option:hover{border-color:#9fb6cf}
+.option.selected{border-color:#245b8f;background:#eef6ff}
+.option.correct{border-color:#2b8555;background:#eaf8ef}
+.option.wrong{border-color:#c34545;background:#fff0f0}
+.small{color:#5f6b78;font-size:12px}
+.status{font-weight:600;font-size:13px}
+.toggle{display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none;font-size:13px}
+.toggle input{display:none}
+.switch{width:38px;height:21px;border-radius:999px;background:#cbd3dc;position:relative;transition:background .18s}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:50%;background:#fff;transition:transform .18s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.toggle input:checked + .switch{background:#245b8f}
+.toggle input:checked + .switch::after{transform:translateX(17px)}
+.feedback{font-weight:600;color:#2b8555;margin-top:4px;font-size:13px}
+.feedback.wrong{color:#c34545}
+.playing-hint{color:#245b8f;font-weight:600;min-height:18px;font-size:13px}
+.tabs{display:flex;gap:4px;flex-wrap:wrap}
+.tabs button{background:#eef1f5;border-color:#d5dce4;padding:5px 9px}
+.tabs button.active{background:#245b8f;color:#fff;border-color:#245b8f}
+.jump-row{display:flex;gap:4px;align-items:center;margin-left:2px}
+.jump-row input{width:56px;text-align:center;padding:5px 6px}
+.group-header{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.group-header h3{margin:0;font-size:15px}
+.divider{height:1px;background:#eef1f5;margin:8px 0}
+.import-extra{display:none;gap:6px;align-items:center;flex-wrap:nowrap}
+.import-extra.show{display:flex}
+.import-extra .filebtn{font-size:12px;padding:4px 8px}
+.import-extra .filebtn input{max-width:120px}
+.import-extra select{font-size:12px;padding:4px 6px;max-width:130px}
+.rate-inline{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#5f6b78}
+.rate-inline input[type=range]{width:90px;padding:0}
+.import-toggle{font-size:12px;padding:4px 8px}
+.kbd-hint{font-size:11px;color:#8a96a5;font-weight:400}
+.kbd{display:inline-block;border:1px solid #cbd3dc;border-bottom-width:2px;border-radius:4px;padding:0 4px;font-size:10px;line-height:16px;background:#f7f9fb;color:#5f6b78;margin:0 1px}
+.action-row{margin-top:8px;border-top:1px dashed #e0e6ed;padding-top:8px}
+.inline-tip{margin-left:8px;font-size:13px;white-space:nowrap;font-weight:600}
+.inline-tip.ok{color:#2b8555}
+.inline-tip.bad{color:#c34545}
+
+/* ---------- 主工具栏：单行排列 ---------- */
+.toolbar{
+  margin-top:6px;
+  gap:6px;
+  flex-wrap:nowrap;
+  overflow-x:auto;
+  align-items:center;
+  padding-bottom:2px;
+}
+.toolbar > *{ flex-shrink:0; }
+.toolbar .spacer{ flex:1 1 auto; min-width:6px; }
+.toolbar::-webkit-scrollbar{height:6px}
+.toolbar::-webkit-scrollbar-thumb{background:#cbd3dc;border-radius:3px}
+.toolbar::-webkit-scrollbar-track{background:transparent}
+
+/* ---------- 听力/阅读 滑动开关 ---------- */
+.mode-switch{
+  position:relative;
+  display:inline-flex;
+  align-items:stretch;
+  background:#e3e8ee;
+  border-radius:999px;
+  padding:3px;
+  user-select:none;
+  flex:none;
+}
+.mode-switch-slider{
+  position:absolute;
+  top:3px;
+  left:3px;
+  width:calc(50% - 3px);
+  height:calc(100% - 6px);
+  background:#245b8f;
+  border-radius:999px;
+  transition:transform .22s ease;
+  pointer-events:none;
+  box-shadow:0 1px 3px rgba(36,91,143,.35);
+}
+.mode-switch.reading .mode-switch-slider{ transform:translateX(100%); }
+.mode-switch-btn{
+  position:relative;
+  z-index:1;
+  flex:1 1 0;
+  min-width:48px;
+  border:none;
+  background:transparent;
+  padding:4px 10px;
+  font-size:12px;
+  font-weight:600;
+  color:#5f6b78;
+  border-radius:999px;
+  transition:color .2s;
+  line-height:1.3;
+}
+.mode-switch-btn:hover{ color:#245b8f; }
+.mode-switch-btn.active,
+.mode-switch-btn.active:hover{ color:#fff; }
+
+/* 题型按钮更紧凑 */
+#subtypeTabs button{ padding:4px 9px; font-size:12px; }
+
+#groupInfo{ white-space:nowrap; }
+
+/* 错题本开关：打开时文字变蓝，给出明确状态 */
+.wrongbook-toggle .toggle-label{font-weight:600;color:#5f6b78;transition:color .18s}
+.wrongbook-toggle input:checked ~ .toggle-label{color:#245b8f}
+
+/* 清除记录：蓝色文本 + 下划线，类似链接 */
+#clearRecords{
+  border:none;
+  background:none;
+  padding:0;
+  color:#245b8f;
+  text-decoration:underline;
+  text-underline-offset:2px;
+  font-size:12px;
+  cursor:pointer;
+  line-height:1.4;
+}
+#clearRecords:hover{ color:#1a4670; }
+
+/* 错题本内每道听力题的原文区域 */
+.wrong-transcript{
+  white-space:pre-wrap;
+  line-height:1.55;
+  background:#f7f9fb;
+  border-radius:6px;
+  padding:8px 10px;
+  margin-top:6px;
+  font-size:13px;
+  color:#333;
+}
+
+/* 错题本题号行：题号 + 听力按钮 + 最右侧删除按钮 */
+.wrongbook-header{ gap:8px; align-items:center; margin-bottom:6px; }
+.wrongbook-header .q-num{ margin-bottom:0; }
+
+/* 错题本内听力按钮更紧凑 */
+.wrongbook-header button{
+  font-size:12px;
+  padding:3px 10px;
+  line-height:1.4;
+}
+
+/* 错题本删除按钮：推到最右侧，红色危险色 */
+.wrongbook-delete-btn{
+  margin-left:auto;
+  color:#c34545;
+  border-color:#e8c4c4;
+  background:#fff;
+}
+.wrongbook-delete-btn:hover{
+  background:#fff0f0;
+  border-color:#c34545;
+}
+
+/* 错题本选项：保持与练习模式相同外观，仅禁用交互 */
+.wrongbook-option{
+  cursor:default;
+}
+
+/* 自动加载题库提示 */
+.loading-tip{color:#245b8f;font-size:13px}
+</style>
+</head>
+<body>
+<header>
+  <h2>M9执照英语练习</h2>
+</header>
+<main>
+
+<section class="panel">
+  <!-- 单行工具栏：导入 · 听力/阅读开关 · 题型 · 题目信息 · 跳转 · 错题本 -->
+  <div class="row toolbar" id="mainToolbar">
+    <button id="toggleImport" class="ghost import-toggle">隐藏导入选项</button>
+    <div class="import-extra row show" id="importExtra">
+      <label class="filebtn">导入题库<input id="file" type="file" accept=".xlsx,.xls,.csv"></label>
+      <label>语音 <select id="voice"><option value="">自动英语语音</option></select></label>
+    </div>
+
+    <div class="mode-switch" id="modeSwitch">
+      <span class="mode-switch-slider"></span>
+      <button class="mode-switch-btn active" data-mode="listening">听力</button>
+      <button class="mode-switch-btn" data-mode="reading">阅读</button>
+    </div>
+
+    <div class="tabs" id="subtypeTabs"></div>
+
+    <span id="groupInfo" class="status">请先导入题库</span>
+
+    <div class="jump-row">
+      <span class="small">跳到第</span>
+      <input id="jumpNo" type="number" min="1" value="1">
+      <button id="jumpBtn" class="ghost">跳转</button>
+    </div>
+
+    <span class="spacer"></span>
+
+    <!-- 错题本开关：打开=错题本，关闭=继续练习 -->
+    <label class="toggle wrongbook-toggle" title="打开查看错题本，关闭回到继续练习">
+      <span class="toggle-label">错题本</span>
+      <input type="checkbox" id="wrongBookSwitch">
+      <span class="switch"></span>
+    </label>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="group-header">
+    <div class="row">
+      <h3 id="qTitle">题目</h3>
+      <span id="listeningControls" class="row">
+        <button class="primary" id="playPause">▶ 播放</button>
+        <span class="rate-inline">
+          <span>语速</span>
+          <input id="rate" type="range" min=".65" max="1.15" step=".05" value=".9">
+        </span>
+        <label class="toggle">
+          <input type="checkbox" id="showText">
+          <span class="switch"></span>
+          <span>显示听力原文</span>
+        </label>
+      </span>
+    </div>
+  </div>
+  <div id="questionsArea" style="margin-top:8px">
+    <p class="small">请先导入题库。</p>
+  </div>
+</section>
+
+<section class="panel" id="listeningPanel" style="display:none">
+  <h3 style="margin:0 0 8px;font-size:15px">听力材料</h3>
+  <div id="transcript">导入题库后，打开“显示听力原文”开关查看材料。</div>
+  <div id="playingHint" class="playing-hint"></div>
+</section>
+
+<section class="panel">
+  <div class="row">
+    <strong style="font-size:13px">练习记录</strong>
+    <span id="stats" class="small">正确 0 · 错误 0 · 未答 0</span>
+    <span id="timer" class="small">用时 0 秒</span>
+    <span style="flex:1"></span>
+    <span class="kbd-hint">
+      <span class="kbd">1</span><span class="kbd">2</span><span class="kbd">3</span>选项 ·
+      <span class="kbd">Enter</span>确认 ·
+      <span class="kbd">←</span><span class="kbd">→</span>上下题 ·
+      <span class="kbd">空格</span>播放/暂停 ·
+      <span class="kbd">↓</span>显示听力原文
+    </span>
+    <span class="small">进度与错题已保存在本机浏览器</span>
+    <button id="clearRecords" title="清除答题记录、进度以及本机题库缓存">清除记录</button>
+  </div>
+</section>
+</main>
+
+<!-- 表格解析库提前加载，保证自动读取题库时可用 -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<script>
+const $ = id => document.getElementById(id);
+
+let listeningGroups = [];
+let readingGroups = [];
+let viewMode = 'all'; // all / wrong
+let currentMode = 'listening';
+let voiceList = [];
+
+/* ---------- 持久化相关全局量 ---------- */
+let lastListeningRows = [];
+let lastReadingRows = [];
+
+const DB_NAME = 'm9-practice';
+const DB_VERSION = 1;
+const STORE = 'kv';
+const BANK_KEY = 'bank-v1';
+const STATE_KEY = 'state-v1';
+
+/* 服务器题库相对路径（与 html 放在同一目录） */
+const AUTO_BANK_URL = '题库.xlsx';
+/* 清除记录后，跳过本次自动加载服务器题库的标记 */
+const SKIP_AUTO_BANK_KEY = 'm9-skip-auto-bank';
+
+let dbPromise = null;
+let saveTimer = null;
+
+function openDB() {
+  if (dbPromise) return dbPromise;
+
+  dbPromise = new Promise((resolve, reject) => {
+    if (!('indexedDB' in window)) {
+      reject(new Error('当前浏览器不支持 IndexedDB'));
+      return;
+    }
+
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains(STORE)) {
+        db.createObjectStore(STORE);
+      }
+    };
+
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+
+  return dbPromise;
+}
+
+async function dbGet(key) {
+  try {
+    const db = await openDB();
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, 'readonly');
+      const req = tx.objectStore(STORE).get(key);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  } catch (error) {
+    console.warn('读取本地存储失败：', error);
+    return undefined;
+  }
+}
+
+async function dbSet(key, value) {
+  try {
+    const db = await openDB();
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, 'readwrite');
+      tx.objectStore(STORE).put(value, key);
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => reject(tx.error);
+    });
+  } catch (error) {
+    console.warn('写入本地存储失败：', error);
+    return false;
+  }
+}
+
+async function dbDel(key) {
+  try {
+    const db = await openDB();
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, 'readwrite');
+      tx.objectStore(STORE).delete(key);
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => reject(tx.error);
+    });
+  } catch (error) {
+    console.warn('删除本地存储失败：', error);
+    return false;
+  }
+}
+
+/*
+ * 答题状态收集：
+ * - 听力题用 L:组ID:原始行号 作为唯一键；
+ * - 阅读题用 R:原始行号 作为唯一键。
+ * 只保存已选择或已确认的题，避免体积过大。
+ */
+function collectAnswers() {
+  const listening = {};
+  const reading = {};
+
+  listeningGroups.forEach(group => {
+    group.questions.forEach(question => {
+      if (question.selected || question.confirmed) {
+        listening[`L:${group.id}:${question.sourceIndex}`] = {
+          selected: question.selected || null,
+          confirmed: !!question.confirmed
+        };
+      }
+    });
+  });
+
+  readingGroups.forEach(group => {
+    group.questions.forEach(question => {
+      if (question.selected || question.confirmed) {
+        reading[`R:${question.sourceIndex}`] = {
+          selected: question.selected || null,
+          confirmed: !!question.confirmed
+        };
+      }
+    });
+  });
+
+  return { listening, reading };
+}
+
+function applyAnswers(answers) {
+  if (!answers) return;
+
+  const listening = answers.listening || {};
+  listeningGroups.forEach(group => {
+    group.questions.forEach(question => {
+      const saved = listening[`L:${group.id}:${question.sourceIndex}`];
+      if (!saved) return;
+      question.selected = saved.selected || null;
+      question.confirmed = !!saved.confirmed;
+      question.result = question.confirmed ? true : null;
+    });
+  });
+
+  const reading = answers.reading || {};
+  readingGroups.forEach(group => {
+    group.questions.forEach(question => {
+      const saved = reading[`R:${question.sourceIndex}`];
+      if (!saved) return;
+      question.selected = saved.selected || null;
+      question.confirmed = !!saved.confirmed;
+      question.result = question.confirmed ? true : null;
+    });
+  });
+}
+
+async function saveStateNow() {
+  if (!listeningGroups.length && !readingGroups.length) return;
+
+  await dbSet(STATE_KEY, {
+    version: 1,
+    savedAt: Date.now(),
+    elapsedMs: currentElapsedMs(),   /* 累计用时（毫秒） */
+    currentMode,
+    listeningTypeFilter,
+    readingTypeFilter,
+    listeningProgress: { ...listeningProgress },
+    readingProgress: { ...readingProgress },
+    answers: collectAnswers()
+  });
+}
+
+/* 防抖保存：频繁选答案时只写一次 */
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveStateNow, 350);
+}
+
+async function saveBank() {
+  if (!lastListeningRows.length && !lastReadingRows.length) return;
+
+  await dbSet(BANK_KEY, {
+    version: 1,
+    savedAt: Date.now(),
+    listeningRows: lastListeningRows,
+    readingRows: lastReadingRows
+  });
+}
+
+/* 导入新题库后：题库覆盖保存，旧答题状态清空 */
+async function persistBankAfterImport() {
+  await dbDel(STATE_KEY);
+  await saveBank();
+}
+
+/* 折叠 / 展开导入选项 */
+function collapseImportOptions() {
+  $('importExtra').classList.remove('show');
+  $('toggleImport').textContent = '显示导入选项';
+}
+
+/* ---------- 题型筛选 ---------- */
+const LISTENING_TYPES = ['全部', '单句', '对话', '短文'];
+const READING_TYPES = ['全部', '汉英', '英汉', '英英'];
+
+let listeningTypeFilter = '全部';
+let readingTypeFilter = '全部';
+
+/*
+ * 练习进度：每个模式、每个题型（含“全部”）都有各自独立的位置。
+ * 例如在“全部”看到第 500 题，切到“单句”从第 1 题看起，
+ * 再切回“全部”仍然回到第 500 题。
+ */
+let listeningProgress = {};
+let readingProgress = {};
+
+function resetListeningProgress() {
+  listeningProgress = {};
+  LISTENING_TYPES.forEach(type => { listeningProgress[type] = 0; });
+}
+
+function resetReadingProgress() {
+  readingProgress = {};
+  READING_TYPES.forEach(type => { readingProgress[type] = 0; });
+}
+
+resetListeningProgress();
+resetReadingProgress();
+
+/* 每个问题播放完后的停顿秒数（主练习界面） */
+const QUESTION_PAUSE_SECONDS = 10;
+/* 错题本内播放时，读完 Question 行后的停顿秒数 */
+const WRONG_PAUSE_SECONDS = 3;
+
+/* ---------- 播放状态（主练习界面） ---------- */
+let playState = {
+  running: false,
+  paused: false,
+  timer: null
+};
+let playQueue = [];
+let playPos = 0;
+let currentPlayIndex = -1;
+let playSession = 0;
+let rateChangedWhilePaused = false;
+
+/* 停顿状态：倒计时定时器与剩余秒数 */
+let pauseCountdown = {
+  timer: null,
+  remaining: 0,
+  active: false
+};
+
+/* ---------- 错题本播放状态（独立于主播放） ---------- */
+let wrongPlayState = {
+  session: 0,
+  activeBtn: null,
+  timer: null
+};
+
+function stopWrongPlay() {
+  wrongPlayState.session++;
+
+  if (wrongPlayState.timer) {
+    clearTimeout(wrongPlayState.timer);
+    wrongPlayState.timer = null;
+  }
+
+  if ('speechSynthesis' in window) {
+    speechSynthesis.cancel();
+  }
+
+  if (wrongPlayState.activeBtn) {
+    wrongPlayState.activeBtn.textContent = '▶ 播放';
+    wrongPlayState.activeBtn = null;
+  }
+}
+
+/* ---------- 计时（累计 + 持久化） ---------- */
+let elapsedMs = 0;        // 历史累计毫秒（不含当前 session）
+let sessionStart = null;  // 当前 session 起点；null 表示未在计时
+let timerInterval = null;
+
+/* 当前总用时 = 历史累计 + 本次 session 已过时间 */
+function currentElapsedMs() {
+  return elapsedMs + (sessionStart !== null ? Date.now() - sessionStart : 0);
+}
+
+function startTimer() {
+  if (sessionStart !== null) return;
+  sessionStart = Date.now();
+  if (timerInterval === null) timerInterval = setInterval(updateTimer, 1000);
+  updateTimer();
+}
+
+function updateTimer() {
+  const totalSec = Math.floor(currentElapsedMs() / 1000);
+  const minutes = Math.floor(totalSec / 60);
+  const seconds = totalSec % 60;
+  $('timer').textContent = minutes > 0
+    ? `用时 ${minutes} 分 ${seconds} 秒`
+    : `用时 ${seconds} 秒`;
+}
+
+function resetTimerIfNeeded() {
+  if (sessionStart === null) startTimer();
+}
+
+/* ---------- 通用文本规范化 ---------- */
+function normalizeText(value, preserveNewlines = false) {
+  let text = String(value ?? '')
+    .replace(/^\uFEFF/, '')
+    .replace(/\r\n?/g, '\n')
+    .replace(/\u00A0/g, ' ')
+    .replace(/\u3000/g, ' ');
+
+  if (preserveNewlines) {
+    return text
+      .split('\n')
+      .map(line => line.replace(/[ \t]+/g, ' ').trim())
+      .join('\n')
+      .trim();
+  }
+
+  return text.replace(/\s+/g, ' ').trim();
+}
+
+function normalizeAnswer(value) {
+  return normalizeText(value).toUpperCase();
+}
+
+/* ---------- 听力解析 ---------- */
+function splitTranscript(full) {
+  const lines = normalizeText(full, true).split('\n');
+  const body = [];
+
+  for (const line of lines) {
+    if (/^\s*Question(?:\s*\d+)?\s*:/i.test(line)) continue;
+    body.push(line);
+  }
+
+  return body.join('\n').trim();
+}
+
+function getQuestionText(full) {
+  const text = normalizeText(full, true);
+  const matches = [
+    ...text.matchAll(/Question(?:\s*\d+)?\s*:\s*([^\n]+)/gi)
+  ];
+
+  return matches.map(match => normalizeText(match[1]));
+}
+
+/*
+ * 听力分组：按第一列“序号”分组。
+ * - 相同序号视为同一题（组内多个小题）。
+ * - 序号为空时，退化为逐行独立分组，避免误合并。
+ * - 组内听力原文取本组所有行的原文去重后拼接；
+ *   若各行原文一致，则只保留一份，播放时不会重复。
+ * - 每行的小题题干优先从本行原文的 Question 行中提取；
+ *   本行只有一条 Question 时直接使用；
+ *   本行有多条 Question 时按行序取对应的一条。
+ * - 组内题型取本组第一行的 G 列“题型”。
+ */
+function setListeningGroups(rows, options = {}) {
+  lastListeningRows = rows;
+
+  const map = new Map();
+
+  rows.forEach((row, sourceIndex) => {
+    const transcript = normalizeText(row.transcript, true);
+    if (!transcript) return;
+
+    const normalizedRow = {
+      ...row,
+      transcript,
+      _sourceIndex: sourceIndex
+    };
+
+    const idKey = normalizeText(row.id);
+    const key = idKey ? `id:${idKey}` : `row-${sourceIndex}`;
+
+    if (!map.has(key)) {
+      map.set(key, {
+        id: idKey,
+        body: '',
+        rows: [],
+        questions: [],
+        fullTranscript: '',
+        type: ''
+      });
+    }
+
+    map.get(key).rows.push(normalizedRow);
+  });
+
+  listeningGroups = [...map.values()].map(group => {
+    // 合并本组所有听力原文（去重后拼接）
+    const uniqueTranscripts = [...new Set(group.rows.map(row => row.transcript))];
+    group.fullTranscript = uniqueTranscripts.join('\n\n');
+    group.body = splitTranscript(group.fullTranscript);
+
+    // 题型：取本组第一行的 G 列
+    group.type = normalizeText(group.rows[0].type) || '';
+
+    // 提取第一行的 Question 文本，仅用于数量一致性告警
+    const extracted = getQuestionText(group.rows[0].transcript);
+
+    if (extracted.length > 1 && extracted.length !== group.rows.length) {
+      console.warn(
+        '听力题目数量与原文 Question 数量不一致：',
+        group.fullTranscript,
+        '题库行数：',
+        group.rows.length,
+        '原文问题数：',
+        extracted.length
+      );
+    }
+
+    group.questions = group.rows.map((row, index) => {
+      const own = getQuestionText(row.transcript);
+      let questionText = '';
+
+      if (own.length === 1) {
+        questionText = own[0];
+      } else if (own.length > 1) {
+        questionText = own[index] ?? own[0];
+      }
+
+      return {
+        id: normalizeText(row.id) || String(index + 1),
+        text:
+          normalizeText(questionText) ||
+          normalizeText(row.question) ||
+          `第 ${index + 1} 题`,
+        A: normalizeText(row.A),
+        B: normalizeText(row.B),
+        C: normalizeText(row.C),
+        answer: normalizeAnswer(row.answer),
+        type: group.type,
+        sourceIndex: row._sourceIndex,
+        selected: null,
+        result: null,
+        confirmed: false
+      };
+    });
+
+    return group;
+  });
+
+  resetListeningProgress();
+  viewMode = 'all';
+  stopPlay();
+
+  if (options.render !== false) render();
+}
+
+/* ---------- 阅读解析 ---------- */
+function setReadingGroups(rows, options = {}) {
+  lastReadingRows = rows;
+
+  readingGroups = rows.map((row, index) => {
+    const question = {
+      id: normalizeText(row.id) || String(index + 1),
+      text: normalizeText(row.question ?? row.transcript),
+      A: normalizeText(row.A),
+      B: normalizeText(row.B),
+      C: normalizeText(row.C),
+      answer: normalizeAnswer(row.answer),
+      type: normalizeText(row.type) || '',
+      sourceIndex: index,
+      selected: null,
+      result: null,
+      confirmed: false
+    };
+
+    return {
+      body: '',
+      rows: [],
+      questions: [question],
+      fullTranscript: '',
+      type: question.type
+    };
+  });
+
+  resetReadingProgress();
+  viewMode = 'all';
+  stopPlay();
+
+  if (options.render !== false) render();
+}
+
+/* ---------- CSV 读取 ---------- */
+function csvParse(text) {
+  const output = [];
+  let row = [];
+  let cell = '';
+  let quoted = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+
+    if (char === '"' && quoted && text[i + 1] === '"') {
+      cell += '"';
+      i++;
+    } else if (char === '"') {
+      quoted = !quoted;
+    } else if (char === ',' && !quoted) {
+      row.push(cell);
+      cell = '';
+    } else if ((char === '\n' || char === '\r') && !quoted) {
+      if (char === '\r' && text[i + 1] === '\n') i++;
+
+      row.push(cell);
+      if (row.some(value => value !== '')) output.push(row);
+
+      row = [];
+      cell = '';
+    } else {
+      cell += char;
+    }
+  }
+
+  row.push(cell);
+  if (row.some(value => value !== '')) output.push(row);
+
+  return output;
+}
+
+/* ---------- 工作表读取 ---------- */
+function rowsFromGrid(grid, kind) {
+  if (!grid.length) throw Error('工作表没有数据');
+
+  const heads = grid[0].map(value => normalizeText(value).toLowerCase());
+
+  function col(names, fallback) {
+    for (const name of names) {
+      const index = heads.findIndex(
+        head => head === normalizeText(name).toLowerCase()
+      );
+      if (index >= 0) return index;
+    }
+    return fallback;
+  }
+
+  if (kind === 'listening') {
+    const columns = {
+      id: col(['题号', '编号', 'id', '序号'], 0),
+      A: col(['A选项', 'A选项内容', '选项A', 'A'], 1),
+      B: col(['B选项', '选项B', 'B'], 2),
+      C: col(['C选项', '选项C', 'C'], 3),
+      answer: col(['正确答案', '答案', 'answer'], 4),
+      transcript: col(['听力原文', '听力材料', '原文', 'transcript', 'F列'], 5),
+      /* G 列：题型（单句 / 对话 / 短文） */
+      type: col(['题型', '类型', 'type', 'G列', 'g列'], 6)
+    };
+
+    return grid.slice(1)
+      .map(row => ({
+        id: row[columns.id],
+        A: row[columns.A],
+        B: row[columns.B],
+        C: row[columns.C],
+        answer: row[columns.answer],
+        transcript: row[columns.transcript],
+        type: row[columns.type]
+      }))
+      .filter(row => normalizeText(row.transcript, true));
+  }
+
+  const columns = {
+    id: col(['序号', '题号', '编号', 'id'], 0),
+    question: col(['题干', '题目', '问题', 'question'], 1),
+    A: col(['选项A', 'A选项', '选项A内容', 'A'], 2),
+    B: col(['选项B', 'B选项', 'B'], 3),
+    C: col(['选项C', 'C选项', 'C'], 4),
+    answer: col(['答案', '正确答案', 'answer'], 5),
+    /* G 列：题型（汉英 / 英汉 / 英英） */
+    type: col(['题型', '类型', 'type', 'G列', 'g列'], 6)
+  };
+
+  return grid.slice(1)
+    .map(row => ({
+      id: row[columns.id],
+      question: row[columns.question],
+      A: row[columns.A],
+      B: row[columns.B],
+      C: row[columns.C],
+      answer: row[columns.answer],
+      type: row[columns.type]
+    }))
+    .filter(row => normalizeText(row.question));
+}
+
+function loadWorkbook(workbook) {
+  let listeningGrid = null;
+  let readingGrid = null;
+
+  for (const name of workbook.SheetNames) {
+    const worksheet = workbook.Sheets[name];
+    const grid = XLSX.utils.sheet_to_json(worksheet, {
+      header: 1,
+      defval: ''
+    });
+
+    if (!grid.length) continue;
+
+    const heads = grid[0].map(value => normalizeText(value).toLowerCase());
+
+    const hasTranscript = heads.some(head =>
+      ['听力原文', '听力材料', 'transcript', 'f列'].includes(head)
+    );
+
+    const hasQuestion = heads.some(head =>
+      ['题干', '题目', '问题', 'question'].includes(head)
+    );
+
+    if (hasTranscript && !listeningGrid) {
+      listeningGrid = grid;
+    } else if (hasQuestion && !readingGrid) {
+      readingGrid = grid;
+    }
+  }
+
+  if (!listeningGrid && !readingGrid) {
+    throw Error('没有找到“听力”或“阅读”工作表，请检查表头。');
+  }
+
+  // 重新导入时重置题型筛选和进度
+  listeningTypeFilter = '全部';
+  readingTypeFilter = '全部';
+  resetListeningProgress();
+  resetReadingProgress();
+
+  if (listeningGrid) {
+    setListeningGroups(rowsFromGrid(listeningGrid, 'listening'), { render: false });
+  } else {
+    listeningGroups = [];
+    lastListeningRows = [];
+  }
+
+  if (readingGrid) {
+    setReadingGroups(rowsFromGrid(readingGrid, 'reading'), { render: false });
+  } else {
+    readingGroups = [];
+    lastReadingRows = [];
+  }
+
+  if (!listeningGroups.length && readingGroups.length) {
+    setMode('reading', false);
+  } else if (listeningGroups.length && !readingGroups.length) {
+    setMode('listening', false);
+  }
+
+  updateGroupInfoAfterImport();
+
+  collapseImportOptions();
+
+  // 新题库：保存题库、清空旧答题状态
+  persistBankAfterImport();
+
+  renderSubtypeTabs();
+  render();
+}
+
+function updateGroupInfoAfterImport() {
+  $('groupInfo').textContent =
+    `听力 ${listeningGroups.length} 组 · 阅读 ${readingGroups.length} 题`;
+}
+
+$('file').addEventListener('change', async event => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  try {
+    if (/\.csv$/i.test(file.name)) {
+      const buffer = await file.arrayBuffer();
+      let text;
+
+      try {
+        text = new TextDecoder('utf-8', { fatal: true }).decode(buffer);
+      } catch {
+        text = new TextDecoder('gb18030').decode(buffer);
+      }
+
+      const grid = csvParse(text);
+      if (!grid.length) throw Error('CSV 文件没有数据');
+
+      const heads = grid[0].map(value => normalizeText(value).toLowerCase());
+
+      const hasTranscript = heads.some(head =>
+        ['听力原文', '听力材料', 'transcript', 'f列'].includes(head)
+      );
+
+      if (hasTranscript) {
+        listeningTypeFilter = '全部';
+        setListeningGroups(rowsFromGrid(grid, 'listening'), { render: false });
+      } else {
+        readingTypeFilter = '全部';
+        setReadingGroups(rowsFromGrid(grid, 'reading'), { render: false });
+      }
+
+      updateGroupInfoAfterImport();
+      collapseImportOptions();
+
+      // 新题库：保存题库、清空旧答题状态
+      persistBankAfterImport();
+
+      renderSubtypeTabs();
+      render();
+    } else {
+      if (!window.XLSX) {
+        alert('读取 .xlsx 需要联网加载表格解析库。也可以先在 Excel 中另存为“CSV UTF-8”再导入。');
+        return;
+      }
+
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data, { type: 'array' });
+      loadWorkbook(workbook);
+    }
+  } catch (error) {
+    alert('导入失败：' + error.message);
+  }
+});
+
+$('toggleImport').onclick = () => {
+  const extra = $('importExtra');
+  extra.classList.toggle('show');
+  $('toggleImport').textContent =
+    extra.classList.contains('show') ? '隐藏导入选项' : '显示导入选项';
+};
+
+/* ---------- 题型筛选按钮 ---------- */
+function renderSubtypeTabs() {
+  const container = $('subtypeTabs');
+  if (!container) return;
+
+  const types = currentMode === 'listening' ? LISTENING_TYPES : READING_TYPES;
+  const current = currentMode === 'listening' ? listeningTypeFilter : readingTypeFilter;
+
+  container.innerHTML = '';
+
+  types.forEach(type => {
+    const button = document.createElement('button');
+    button.textContent = type;
+    if (type === current) button.classList.add('active');
+
+    button.onclick = () => switchSubtypeFilter(type);
+
+    container.appendChild(button);
+  });
+}
+
+/*
+ * 切换题型筛选：
+ * 每种题型（含“全部”）各自保存独立的练习进度。
+ * 切到某题型时读取该题型上次离开时的题目；切回来时也回到该题。
+ */
+function switchSubtypeFilter(type) {
+  if (type === currentTypeFilter()) return;
+
+  stopPlay();
+  stopWrongPlay();
+
+  if (currentMode === 'listening') {
+    listeningTypeFilter = type;
+  } else {
+    readingTypeFilter = type;
+  }
+
+  clampActiveIndex();
+  viewMode = 'all';
+  renderSubtypeTabs();
+  render();
+}
+
+/*
+ * 当进度索引超出该筛选下的题目数量时，夹到合法范围。
+ * （正常切换不会越界；仅在数据发生变化时兜底。）
+ */
+function clampActiveIndex() {
+  const groups = activeGroups();
+  if (!groups.length) {
+    setActiveIndex(0);
+    return;
+  }
+  const index = activeIndex();
+  if (index >= groups.length) setActiveIndex(groups.length - 1);
+  else if (index < 0) setActiveIndex(0);
+}
+
+/* ---------- 模式切换（滑动开关） ---------- */
+function setMode(selectedMode, doRender = true) {
+  currentMode = selectedMode;
+
+  const switchEl = $('modeSwitch');
+  switchEl.classList.toggle('reading', selectedMode === 'reading');
+
+  switchEl.querySelectorAll('.mode-switch-btn').forEach(button => {
+    button.classList.toggle('active', button.dataset.mode === selectedMode);
+  });
+
+  $('listeningControls').style.display =
+    selectedMode === 'listening' ? '' : 'none';
+
+  renderSubtypeTabs();
+
+  // 每个模式有独立进度；切换后夹到合法范围
+  clampActiveIndex();
+
+  if (doRender) render();
+}
+
+document.querySelectorAll('.mode-switch-btn').forEach(button => {
+  button.onclick = () => {
+    if (button.dataset.mode === currentMode) return;
+    stopPlay();
+    stopWrongPlay();
+    setMode(button.dataset.mode);
+  };
+});
+
+/* ---------- 当前题目数据 ---------- */
+function currentTypeFilter() {
+  return currentMode === 'listening' ? listeningTypeFilter : readingTypeFilter;
+}
+
+/* 按题型筛选后的组列表 */
+function activeGroups() {
+  const base = currentMode === 'listening' ? listeningGroups : readingGroups;
+  const filter = currentTypeFilter();
+
+  if (!filter || filter === '全部') return base;
+
+  return base.filter(group => group.type === filter);
+}
+
+/* 读取/写入当前模式、当前题型下的进度 */
+function activeIndex() {
+  if (currentMode === 'listening') {
+    return listeningProgress[listeningTypeFilter] ?? 0;
+  }
+  return readingProgress[readingTypeFilter] ?? 0;
+}
+
+function setActiveIndex(index) {
+  if (currentMode === 'listening') {
+    listeningProgress[listeningTypeFilter] = index;
+  } else {
+    readingProgress[readingTypeFilter] = index;
+  }
+}
+
+function activeGroup() {
+  const groups = activeGroups();
+  if (!groups.length) return undefined;
+
+  let index = activeIndex();
+
+  if (index >= groups.length) {
+    index = groups.length - 1;
+    setActiveIndex(index);
+  } else if (index < 0) {
+    index = 0;
+    setActiveIndex(index);
+  }
+
+  return groups[index];
+}
+
+function activeQs() {
+  const group = activeGroup();
+  return group ? group.questions : [];
+}
+
+function wrongQuestions() {
+  const output = [];
+
+  activeGroups().forEach((group, groupIndex) => {
+    group.questions.forEach(question => {
+      if (question.confirmed && question.selected !== question.answer) {
+        output.push({ group, groupIndex, q: question });
+      }
+    });
+  });
+
+  return output;
+}
+
+/* ---------- 统一确认逻辑 ---------- */
+function confirmSelectedQuestions() {
+  const questions = activeQs();
+
+  if (!questions.length) return false;
+
+  const pending = questions.filter(
+    question => !question.confirmed && question.selected
+  );
+
+  if (!pending.length) {
+    if (questions.every(question => question.confirmed)) return false;
+
+    alert('请先选择答案。');
+    return false;
+  }
+
+  pending.forEach(question => {
+    question.confirmed = true;
+    question.result = true;
+  });
+
+  resetTimerIfNeeded();
+  render();
+
+  return true;
+}
+
+function autoConfirmBeforeLeave() {
+  const pending = activeQs().filter(
+    question => !question.confirmed && question.selected
+  );
+
+  if (!pending.length) return null;
+
+  let right = 0;
+  let wrong = 0;
+
+  pending.forEach(question => {
+    question.confirmed = true;
+    question.result = true;
+
+    if (question.selected === question.answer) {
+      right++;
+    } else {
+      wrong++;
+    }
+  });
+
+  return {
+    count: pending.length,
+    right,
+    wrong,
+    ok: wrong === 0
+  };
+}
+
+/* ---------- 统一切题逻辑 ---------- */
+function navigateGroup(delta) {
+  if (viewMode === 'wrong') return;
+
+  const groups = activeGroups();
+  if (!groups.length) return;
+
+  stopPlay();
+
+  const result = autoConfirmBeforeLeave();
+  const nextIndex = activeIndex() + delta;
+  const targetButton = delta > 0 ? '下一题' : '上一题';
+
+  if (nextIndex < 0) {
+    render({
+      message: '已是第一题',
+      anchor: targetButton,
+      type: 'info'
+    });
+    return;
+  }
+
+  if (nextIndex >= groups.length) {
+    render({
+      message: '已是最后一题',
+      anchor: targetButton,
+      type: 'info',
+      result
+    });
+    return;
+  }
+
+  setActiveIndex(nextIndex);
+
+  const tip = result
+    ? { ...result, anchor: targetButton }
+    : null;
+
+  render({ navTip: tip });
+}
+
+/* ---------- 错题本开关：打开=错题本，关闭=继续练习 ---------- */
+function syncWrongBookSwitch() {
+  const box = $('wrongBookSwitch');
+  if (box) box.checked = viewMode === 'wrong';
+}
+
+function setWrongBookMode(on) {
+  stopPlay();
+  stopWrongPlay();
+  viewMode = on ? 'wrong' : 'all';
+  render();
+}
+
+$('wrongBookSwitch').addEventListener('change', event => {
+  setWrongBookMode(event.target.checked);
+});
+
+/* ---------- 清除记录（同时清除本机题库） ---------- */
+$('clearRecords').onclick = async () => {
+  const ok = confirm(
+    '确定清除所有答题记录、练习进度，以及本机缓存的题库吗？\n' +
+    '清除后本次打开将不会自动加载服务器题库，需要重新导入或刷新页面。'
+  );
+  if (!ok) return;
+
+  stopPlay();
+  stopWrongPlay();
+
+  await dbDel(STATE_KEY);
+  await dbDel(BANK_KEY);
+
+  // 标记本次刷新不要自动加载服务器题库
+  try {
+    sessionStorage.setItem(SKIP_AUTO_BANK_KEY, '1');
+  } catch (error) {
+    /* sessionStorage 不可用则忽略 */
+  }
+
+  location.reload();
+};
+
+/* ---------- 删除单道错题（无需确认，直接删除） ---------- */
+function deleteWrongQuestion(q) {
+  stopWrongPlay();
+
+  q.selected = null;
+  q.confirmed = false;
+  q.result = null;
+
+  saveStateNow();
+  render();
+}
+
+/* ---------- 渲染 ---------- */
+function render(options = null) {
+  // 任何一次渲染都让开关状态与实际视图保持一致
+  syncWrongBookSwitch();
+
+  // 防抖保存当前进度与答案
+  scheduleSave();
+
+  const navTip = options && options.navTip ? options.navTip : null;
+
+  const groups = activeGroups();
+  const group = activeGroup();
+  const area = $('questionsArea');
+
+  if (viewMode === 'wrong') {
+    renderWrongBook();
+    return;
+  }
+
+  if (!group) {
+    const base = currentMode === 'listening' ? listeningGroups : readingGroups;
+    const filterLabel = currentTypeFilter();
+
+    if (base.length && filterLabel !== '全部') {
+      $('groupInfo').textContent =
+        `${currentMode === 'listening' ? '听力' : '阅读'}·${filterLabel} 0 / 0`;
+      $('qTitle').textContent = '题目';
+      area.innerHTML =
+        `<p class="small">当前题型（${filterLabel}）下暂无题目，请切换题型。</p>`;
+    } else {
+      $('groupInfo').textContent =
+        currentMode === 'listening' ? '听力：请先导入题库' : '阅读：请先导入题库';
+      $('qTitle').textContent = '题目';
+      area.innerHTML = '<p class="small">请先导入题库。</p>';
+    }
+
+    $('listeningPanel').style.display = 'none';
+    updateStats();
+    return;
+  }
+
+  area.innerHTML = '';
+
+  const questions = activeQs();
+  const filterLabel = currentTypeFilter();
+  const suffix = filterLabel && filterLabel !== '全部' ? `·${filterLabel}` : '';
+
+  $('groupInfo').textContent =
+    `${currentMode === 'listening' ? '听力' : '阅读'}${suffix} ` +
+    `${activeIndex() + 1} / ${groups.length}`;
+
+  $('qTitle').textContent = `第 ${activeIndex() + 1} 题`;
+
+  if (!questions.length) {
+    area.innerHTML = '<p class="small">当前组没有题目。</p>';
+  } else {
+    questions.forEach((question, index) => {
+      const block = document.createElement('div');
+      block.className = 'question-block';
+
+      /* 听力一组可能有多题，需要题号；阅读每组只有一题，不显示题号 */
+      if (currentMode === 'listening') {
+        const number = document.createElement('div');
+        number.className = 'q-num';
+        number.textContent = `第 ${index + 1} 题`;
+        block.appendChild(number);
+      }
+
+      if (currentMode === 'reading' && question.text) {
+        const questionText = document.createElement('div');
+        questionText.className = 'q-text';
+        questionText.textContent = question.text;
+        block.appendChild(questionText);
+      }
+
+      const options = document.createElement('div');
+
+      ['A', 'B', 'C'].forEach(key => {
+        const button = document.createElement('button');
+        button.className = 'option';
+        button.textContent = `${key}. ${question[key] ?? ''}`;
+
+        if (question.selected === key) button.classList.add('selected');
+
+        if (question.result && question.answer === key) {
+          button.classList.add('correct');
+        }
+
+        if (question.result && question.selected === key && question.answer !== key) {
+          button.classList.add('wrong');
+        }
+
+        button.onclick = () => {
+          if (question.result) return;
+
+          question.selected = key;
+          resetTimerIfNeeded();
+          render();
+        };
+
+        options.appendChild(button);
+      });
+
+      block.appendChild(options);
+
+      /* 确认后始终显示答案反馈，与“显示听力原文”开关无关 */
+      if (question.result) {
+        const feedback = document.createElement('div');
+        feedback.className = 'feedback';
+
+        if (question.selected === question.answer) {
+          feedback.textContent = `正确。答案：${question.answer}。`;
+        } else {
+          feedback.classList.add('wrong');
+          feedback.textContent =
+            `错误。你的答案：${question.selected || '未选'}；正确答案：${question.answer}。`;
+        }
+
+        block.appendChild(feedback);
+      }
+
+      area.appendChild(block);
+    });
+
+    const actionRow = document.createElement('div');
+    actionRow.className = 'row action-row';
+
+    const confirmButton = document.createElement('button');
+    confirmButton.className = 'primary';
+    confirmButton.textContent = '确认';
+    confirmButton.onclick = confirmSelectedQuestions;
+    actionRow.appendChild(confirmButton);
+
+    const previousButton = document.createElement('button');
+    previousButton.className = 'ghost';
+    previousButton.textContent = '上一题';
+    previousButton.onclick = () => navigateGroup(-1);
+    actionRow.appendChild(previousButton);
+
+    const nextButton = document.createElement('button');
+    nextButton.className = 'ghost';
+    nextButton.textContent = '下一题';
+    nextButton.onclick = () => navigateGroup(1);
+    actionRow.appendChild(nextButton);
+
+    area.appendChild(actionRow);
+
+    if (navTip) {
+      const targetText = navTip.anchor || '下一题';
+      const targetButton = [...actionRow.querySelectorAll('button')]
+        .find(button => button.textContent === targetText);
+
+      if (targetButton) {
+        insertNextTip(targetButton, navTip);
+      }
+    }
+  }
+
+  updateStats();
+
+  const listeningPanel = $('listeningPanel');
+
+  /* “显示听力原文”只控制听力材料面板的显示 */
+  if (currentMode === 'listening' && $('showText').checked) {
+    listeningPanel.style.display = '';
+    $('transcript').textContent = group.fullTranscript || '（无听力原文）';
+  } else {
+    listeningPanel.style.display = 'none';
+  }
+}
+
+/* ---------- 错题本内：单题播放 ---------- */
+function toggleWrongPlay(group, btn) {
+  if (!('speechSynthesis' in window)) {
+    alert('当前浏览器不支持语音朗读。');
+    return;
+  }
+
+  // 点击正在播放的按钮：停止
+  if (wrongPlayState.activeBtn === btn) {
+    stopWrongPlay();
+    return;
+  }
+
+  // 先停止主播放与之前的错题播放
+  stopPlay();
+  stopWrongPlay();
+
+  const fullText = normalizeText(group.fullTranscript, true);
+  if (!fullText) return;
+
+  const rawLines = fullText
+    .split('\n')
+    .map(line => line.trim())
+    .filter(Boolean);
+
+  const queue = rawLines.map((text, index) => ({
+    text,
+    index,
+    isQuestion: /^\s*Question(?:\s*\d+)?\s*:/i.test(text)
+  }));
+
+  const session = ++wrongPlayState.session;
+  let pos = 0;
+
+  wrongPlayState.activeBtn = btn;
+  btn.textContent = '■ 停止';
+
+  function clearTimer() {
+    if (wrongPlayState.timer) {
+      clearTimeout(wrongPlayState.timer);
+      wrongPlayState.timer = null;
+    }
+  }
+
+  function finish() {
+    clearTimer();
+    if (wrongPlayState.activeBtn === btn) {
+      btn.textContent = '▶ 播放';
+      wrongPlayState.activeBtn = null;
+    }
+  }
+
+  function next() {
+    if (session !== wrongPlayState.session) return;
+
+    if (pos >= queue.length) {
+      finish();
+      return;
+    }
+
+    const item = queue[pos++];
+
+    const utterance = makeUtterance(item.text, () => {
+      if (session !== wrongPlayState.session) return;
+
+      // 读完 Question 行且后面还有内容时，短暂停顿后继续
+      if (item.isQuestion && pos < queue.length) {
+        let remain = WRONG_PAUSE_SECONDS;
+
+        function tick() {
+          if (session !== wrongPlayState.session) return;
+
+          if (remain <= 0) {
+            wrongPlayState.timer = null;
+            next();
+            return;
+          }
+
+          remain--;
+          wrongPlayState.timer = setTimeout(tick, 1000);
+        }
+
+        tick();
+        return;
+      }
+
+      next();
+    });
+
+    speechSynthesis.speak(utterance);
+  }
+
+  next();
+}
+
+/* ---------- 错题本 ---------- */
+function renderWrongBook() {
+  // 重建 DOM 前先停止错题本播放，避免按钮引用失效
+  stopWrongPlay();
+
+  const area = $('questionsArea');
+  const items = wrongQuestions();
+  const filterLabel = currentTypeFilter();
+  const suffix = filterLabel && filterLabel !== '全部' ? `·${filterLabel}` : '';
+
+  $('groupInfo').textContent =
+    `${currentMode === 'listening' ? '听力' : '阅读'}${suffix} · 错题本`;
+
+  $('qTitle').textContent = `错题本（共 ${items.length} 题）`;
+
+  // 错题本中不使用顶部全局听力面板，原文跟随每道题显示
+  $('listeningPanel').style.display = 'none';
+
+  area.innerHTML = '';
+
+  if (!items.length) {
+    area.innerHTML = '<p class="small">本次暂无错题。</p>';
+    updateStats();
+    return;
+  }
+
+  items.forEach(({ group, q }) => {
+    const block = document.createElement('div');
+    block.className = 'question-block';
+
+    /* 题号行：题号 + 听力题的播放/显示原文按钮 + 最右侧删除按钮 */
+    const headerRow = document.createElement('div');
+    headerRow.className = 'row wrongbook-header';
+
+    const number = document.createElement('span');
+    number.className = 'q-num';
+    number.textContent = `第 ${q.id} 题`;
+    headerRow.appendChild(number);
+
+    let transcriptBox = null;
+
+    if (currentMode === 'listening') {
+      const playBtn = document.createElement('button');
+      playBtn.className = 'ghost';
+      playBtn.textContent = '▶ 播放';
+      playBtn.onclick = () => toggleWrongPlay(group, playBtn);
+
+      const textBtn = document.createElement('button');
+      textBtn.className = 'ghost';
+      textBtn.textContent = '显示原文';
+
+      transcriptBox = document.createElement('div');
+      transcriptBox.className = 'wrong-transcript';
+      transcriptBox.style.display = 'none';
+      transcriptBox.textContent = group.fullTranscript || '（无听力原文）';
+
+      textBtn.onclick = () => {
+        const show = transcriptBox.style.display === 'none';
+        transcriptBox.style.display = show ? '' : 'none';
+        textBtn.textContent = show ? '隐藏原文' : '显示原文';
+      };
+
+      headerRow.appendChild(playBtn);
+      headerRow.appendChild(textBtn);
+    }
+
+    /* 最右侧删除按钮：听力、阅读错题都支持 */
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'ghost wrongbook-delete-btn';
+    deleteBtn.textContent = '删除';
+    deleteBtn.onclick = () => deleteWrongQuestion(q);
+    headerRow.appendChild(deleteBtn);
+
+    block.appendChild(headerRow);
+
+    if (currentMode === 'reading' && q.text) {
+      const questionText = document.createElement('div');
+      questionText.className = 'q-text';
+      questionText.textContent = q.text;
+      block.appendChild(questionText);
+    }
+
+    const options = document.createElement('div');
+
+    ['A', 'B', 'C'].forEach(key => {
+      const button = document.createElement('button');
+      button.className = 'option wrongbook-option';
+      button.textContent = `${key}. ${q[key] ?? ''}`;
+
+      if (q.selected === key) button.classList.add('wrong');
+      if (q.answer === key) button.classList.add('correct');
+
+      /* 不使用 disabled，避免整体变淡；改为空点击 + 默认光标 */
+      button.onclick = () => {};
+
+      options.appendChild(button);
+    });
+
+    block.appendChild(options);
+
+    const feedback = document.createElement('div');
+    feedback.className = 'feedback wrong';
+    feedback.textContent =
+      `你的答案：${q.selected || '未选'}；正确答案：${q.answer}。`;
+
+    block.appendChild(feedback);
+
+    /* 听力原文区域放在题目块最后，点击“显示原文”才出现 */
+    if (transcriptBox) {
+      block.appendChild(transcriptBox);
+    }
+
+    area.appendChild(block);
+  });
+
+  updateStats();
+}
+
+/* ---------- 统一结果提示 ---------- */
+function insertNextTip(button, tip) {
+  if (!button || !tip) return;
+
+  const row = button.parentElement;
+  const oldTip = row.querySelector('.inline-tip');
+  if (oldTip) oldTip.remove();
+
+  const span = document.createElement('span');
+
+  if (tip.message) {
+    span.className = 'inline-tip';
+    span.style.color = '#5f6b78';
+    span.textContent = tip.message;
+  } else {
+    span.className = 'inline-tip ' + (tip.ok ? 'ok' : 'bad');
+
+    if (tip.count > 1) {
+      span.textContent = `本次 ${tip.right} 对、${tip.wrong} 错`;
+    } else {
+      span.textContent = tip.ok ? '正确' : '错误';
+    }
+  }
+
+  button.insertAdjacentElement('afterend', span);
+
+  setTimeout(() => {
+    span.remove();
+  }, 3000);
+}
+
+/* ---------- 统计（只统计当前模式 + 当前题型筛选下的题目） ---------- */
+function updateStats() {
+  let right = 0;
+  let wrong = 0;
+  let unanswered = 0;
+
+  activeGroups().forEach(group => {
+    group.questions.forEach(question => {
+      if (!question.confirmed) {
+        unanswered++;
+      } else if (question.selected === question.answer) {
+        right++;
+      } else {
+        wrong++;
+      }
+    });
+  });
+
+  $('stats').textContent = `正确 ${right} · 错误 ${wrong} · 未答 ${unanswered}`;
+}
+
+/* ---------- 跳转 ---------- */
+$('jumpBtn').onclick = () => {
+  if (viewMode === 'wrong') {
+    viewMode = 'all';
+  }
+
+  const number = parseInt($('jumpNo').value, 10);
+  const groups = activeGroups();
+
+  if (!groups.length) {
+    alert('当前题型下暂无题目');
+    return;
+  }
+
+  if (isNaN(number) || number < 1 || number > groups.length) {
+    alert(`请输入 1 到 ${groups.length} 之间的数字`);
+    return;
+  }
+
+  stopPlay();
+  stopWrongPlay();
+  autoConfirmBeforeLeave();
+  setActiveIndex(number - 1);
+  render();
+};
+
+$('jumpNo').addEventListener('keydown', event => {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    $('jumpBtn').click();
+  }
+});
+
+/* ---------- 显示听力原文 ---------- */
+$('showText').addEventListener('change', () => {
+  render();
+});
+
+/* ---------- 播放控制（主练习界面） ---------- */
+function updatePlayPauseBtn() {
+  const button = $('playPause');
+
+  if (playState.running && !playState.paused) {
+    button.textContent = '⏸ 暂停';
+  } else if (playState.running && playState.paused) {
+    button.textContent = '▶ 继续';
+  } else {
+    button.textContent = '▶ 播放';
+  }
+}
+
+/* 清空停顿倒计时 */
+function clearPauseCountdown() {
+  pauseCountdown.active = false;
+  pauseCountdown.remaining = 0;
+
+  if (pauseCountdown.timer) {
+    clearTimeout(pauseCountdown.timer);
+    pauseCountdown.timer = null;
+  }
+}
+
+/*
+ * 在读完一个问题（Question 行）后停顿 QUESTION_PAUSE_SECONDS 秒。
+ * - 暂停/继续、切题、语速调整等会通过 playSession 使该停顿失效。
+ * - 停顿期间按钮显示“暂停”，但底层没有 utterance 在播；
+ *   点击暂停会取消停顿并进入“继续”状态，再点继续则从下一行继续。
+ */
+function scheduleQuestionPause(session, nextLine) {
+  pauseCountdown.active = true;
+  pauseCountdown.remaining = QUESTION_PAUSE_SECONDS;
+
+  const deadline = Date.now() + QUESTION_PAUSE_SECONDS * 1000;
+
+  function tick() {
+    if (session !== playSession || !playState.running) {
+      clearPauseCountdown();
+      return;
+    }
+
+    if (playState.paused) {
+      /*
+       * 停顿期间点了暂停：
+       * 固定剩余时间，等待 resume 后继续倒计时。
+       */
+      return;
+    }
+
+    const remaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+    pauseCountdown.remaining = remaining;
+
+    if (remaining <= 0) {
+      clearPauseCountdown();
+      nextLine();
+      return;
+    }
+
+    $('playingHint').textContent =
+      `本题已读完，${remaining} 秒后继续下一题...`;
+
+    pauseCountdown.timer = setTimeout(tick, 250);
+  }
+
+  $('playingHint').textContent =
+    `本题已读完，${QUESTION_PAUSE_SECONDS} 秒后继续下一题...`;
+
+  pauseCountdown.timer = setTimeout(tick, 250);
+}
+
+function stopPlay() {
+  playState.running = false;
+  playState.paused = false;
+  playSession++;
+
+  if (playState.timer) {
+    clearTimeout(playState.timer);
+    playState.timer = null;
+  }
+
+  if ('speechSynthesis' in window) {
+    speechSynthesis.cancel();
+  }
+
+  clearPauseCountdown();
+
+  playQueue = [];
+  playPos = 0;
+  currentPlayIndex = -1;
+  rateChangedWhilePaused = false;
+
+  $('playingHint').textContent = '';
+  updatePlayPauseBtn();
+}
+
+function makeUtterance(text, onEnd) {
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'en-US';
+  utterance.rate = Number($('rate').value);
+
+  const selectedVoice = $('voice').value;
+
+  if (selectedVoice) {
+    const voice = voiceList.find(item => item.name === selectedVoice);
+    if (voice) utterance.voice = voice;
+  }
+
+  if (onEnd) utterance.onend = onEnd;
+
+  utterance.onerror = event => {
+    if (event.error === 'canceled' || event.error === 'interrupted') return;
+    $('playingHint').textContent = `语音播放出错：${event.error || '未知错误'}`;
+  };
+
+  return utterance;
+}
+
+function playFullMaterial(fromPos = 0) {
+  // 主播放开始前，停止错题本内可能正在进行的播放
+  stopWrongPlay();
+
+  stopPlay();
+
+  if (currentMode !== 'listening') {
+    alert('请切换到“听力”模式再播放。');
+    return;
+  }
+
+  const group = activeGroup();
+  if (!group) return;
+
+  if (!('speechSynthesis' in window)) {
+    alert('当前浏览器不支持语音朗读。请使用新版 Edge 或 Chrome。');
+    return;
+  }
+
+  const fullText = normalizeText(group.fullTranscript, true);
+
+  if (!fullText) {
+    $('playingHint').textContent = '（无听力原文）';
+    return;
+  }
+
+  const rawLines = fullText
+    .split('\n')
+    .map(line => line.trim())
+    .filter(Boolean);
+
+  /*
+   * 标记每行是否为“Question 行”（题干行）。
+   * 读完题干行后若后面还有内容，则停顿 QUESTION_PAUSE_SECONDS 秒。
+   */
+  playQueue = rawLines.map((text, index) => ({
+    text,
+    index,
+    isQuestion: /^\s*Question(?:\s*\d+)?\s*:/i.test(text)
+  }));
+
+  playPos = Math.max(0, Math.min(fromPos, playQueue.length - 1));
+
+  const session = playSession;
+
+  playState.running = true;
+  playState.paused = false;
+  updatePlayPauseBtn();
+
+  function nextLine() {
+    if (session !== playSession || !playState.running) return;
+
+    if (playPos >= playQueue.length) {
+      playState.running = false;
+      playState.paused = false;
+      currentPlayIndex = -1;
+      clearPauseCountdown();
+      $('playingHint').textContent = '播放结束。';
+      updatePlayPauseBtn();
+      return;
+    }
+
+    const item = playQueue[playPos++];
+    currentPlayIndex = item.index;
+
+    $('playingHint').textContent =
+      `正在播放第 ${item.index + 1} / ${playQueue.length} 行...`;
+
+    const utterance = makeUtterance(item.text, () => {
+      if (session !== playSession) return;
+      if (playState.paused) return;
+
+      /*
+       * 读完题干行，且后面还有下一行时，停顿指定秒数再继续。
+       * 若这是最后一行（或后面没有内容），直接结束，不需要停顿。
+       */
+      if (item.isQuestion && playPos < playQueue.length) {
+        scheduleQuestionPause(session, nextLine);
+        return;
+      }
+
+      nextLine();
+    });
+
+    speechSynthesis.speak(utterance);
+  }
+
+  nextLine();
+}
+
+$('playPause').onclick = () => {
+  if (!('speechSynthesis' in window)) {
+    alert('当前浏览器不支持语音朗读。');
+    return;
+  }
+
+  if (!playState.running) {
+    playFullMaterial();
+    return;
+  }
+
+  /*
+   * 停顿倒计时期间：没有 utterance 在播。
+   * 点“暂停”= 取消停顿并保持“继续”状态；
+   * 此时再点“继续”应从下一行继续。
+   */
+  if (pauseCountdown.active && !playState.paused) {
+    pauseCountdown.active = false;
+    if (pauseCountdown.timer) {
+      clearTimeout(pauseCountdown.timer);
+      pauseCountdown.timer = null;
+    }
+    playState.paused = true;
+    $('playingHint').textContent = '已暂停。';
+    updatePlayPauseBtn();
+    return;
+  }
+
+  if (pauseCountdown.active && playState.paused) {
+    /*
+     * 从停顿中“继续”：直接跳过剩余停顿，继续播放下一行。
+     */
+    pauseCountdown.active = false;
+    if (pauseCountdown.timer) {
+      clearTimeout(pauseCountdown.timer);
+      pauseCountdown.timer = null;
+    }
+    playState.paused = false;
+    updatePlayPauseBtn();
+
+    // 继续播放队列中的下一行
+    const session = playSession;
+    (function continueFromQueue() {
+      if (session !== playSession || !playState.running) return;
+      if (playPos >= playQueue.length) {
+        playState.running = false;
+        playState.paused = false;
+        currentPlayIndex = -1;
+        clearPauseCountdown();
+        $('playingHint').textContent = '播放结束。';
+        updatePlayPauseBtn();
+        return;
+      }
+
+      const item = playQueue[playPos++];
+      currentPlayIndex = item.index;
+      $('playingHint').textContent =
+        `正在播放第 ${item.index + 1} / ${playQueue.length} 行...`;
+
+      const utterance = makeUtterance(item.text, () => {
+        if (session !== playSession) return;
+        if (playState.paused) return;
+        if (item.isQuestion && playPos < playQueue.length) {
+          scheduleQuestionPause(session, continueFromQueue);
+          return;
+        }
+        continueFromQueue();
+      });
+
+      speechSynthesis.speak(utterance);
+    })();
+    return;
+  }
+
+  if (playState.paused) {
+    if (rateChangedWhilePaused && currentPlayIndex >= 0) {
+      const resumeIndex = currentPlayIndex;
+      rateChangedWhilePaused = false;
+      playFullMaterial(resumeIndex);
+      return;
+    }
+
+    speechSynthesis.resume();
+    playState.paused = false;
+  } else {
+    speechSynthesis.pause();
+    playState.paused = true;
+  }
+
+  updatePlayPauseBtn();
+};
+
+$('rate').addEventListener('change', () => {
+  if (!playState.running) return;
+
+  if (playState.paused) {
+    rateChangedWhilePaused = true;
+    return;
+  }
+
+  if (currentPlayIndex >= 0) {
+    playFullMaterial(currentPlayIndex);
+  }
+});
+
+/* ---------- 键盘快捷键 ---------- */
+document.addEventListener('keydown', event => {
+  const targetTag = (event.target.tagName || '').toLowerCase();
+
+  if (targetTag === 'input' || targetTag === 'textarea' || targetTag === 'select') {
+    return;
+  }
+
+  if (viewMode === 'wrong') return;
+
+  const group = activeGroup();
+  if (!group) return;
+
+  const questions = activeQs();
+  const currentQuestion = questions.find(question => !question.confirmed);
+
+  if (event.key === '1' || event.key === '2' || event.key === '3') {
+    if (!currentQuestion) return;
+
+    const key = String.fromCharCode(64 + Number(event.key));
+    currentQuestion.selected = key;
+
+    resetTimerIfNeeded();
+    render();
+    event.preventDefault();
+    return;
+  }
+
+  if (event.key === 'Enter') {
+    confirmSelectedQuestions();
+    event.preventDefault();
+    return;
+  }
+
+  if (event.key === 'ArrowLeft') {
+    navigateGroup(-1);
+    event.preventDefault();
+    return;
+  }
+
+  if (event.key === 'ArrowRight') {
+    navigateGroup(1);
+    event.preventDefault();
+    return;
+  }
+
+  if (event.key === ' ') {
+    if (currentMode !== 'listening') return;
+
+    $('playPause').click();
+    event.preventDefault();
+    return;
+  }
+
+  if (event.key === 'ArrowDown') {
+    if (currentMode === 'listening') {
+      const showText = $('showText');
+      showText.checked = !showText.checked;
+      render();
+      event.preventDefault();
+    }
+  }
+});
+
+/* ---------- 语音列表 ---------- */
+function refreshVoices() {
+  if (!('speechSynthesis' in window)) return;
+
+  voiceList = speechSynthesis.getVoices();
+
+  const select = $('voice');
+  const previousValue = select.value;
+
+  select.innerHTML = '<option value="">自动英语语音</option>';
+
+  voiceList
+    .filter(voice => /^en(-|_)/i.test(voice.lang))
+    .sort((a, b) => {
+      const priorityA = /US|United States|American/i.test(a.name + ' ' + a.lang) ? 0 : 1;
+      const priorityB = /US|United States|American/i.test(b.name + ' ' + b.lang) ? 0 : 1;
+
+      if (priorityA !== priorityB) return priorityA - priorityB;
+
+      return a.name.localeCompare(b.name);
+    })
+    .forEach(voice => {
+      const option = document.createElement('option');
+      option.value = voice.name;
+      option.textContent = `${voice.name} (${voice.lang})`;
+      select.appendChild(option);
+    });
+
+  if ([...select.options].some(option => option.value === previousValue)) {
+    select.value = previousValue;
+  }
+}
+
+if ('speechSynthesis' in window) {
+  speechSynthesis.addEventListener('voiceschanged', refreshVoices);
+  refreshVoices();
+}
+
+/* ---------- 服务器题库自动加载 ---------- */
+function waitForXLSX(timeout = 10000) {
+  if (window.XLSX) return Promise.resolve(true);
+
+  return new Promise(resolve => {
+    const start = Date.now();
+    const timer = setInterval(() => {
+      if (window.XLSX) {
+        clearInterval(timer);
+        resolve(true);
+      } else if (Date.now() - start >= timeout) {
+        clearInterval(timer);
+        resolve(false);
+      }
+    }, 100);
+  });
+}
+
+/*
+ * 从相对路径读取题库文件。
+ * 成功返回 true，失败（文件不存在 / 无网络 / 解析错误）返回 false，
+ * 不会打断页面正常使用，用户仍可手动导入。
+ */
+async function loadBankFromUrl(url) {
+  try {
+    const ready = await waitForXLSX();
+    if (!ready) {
+      console.warn('表格解析库未就绪，跳过自动加载题库。');
+      return false;
+    }
+
+    const response = await fetch(url, { cache: 'no-store' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const buffer = await response.arrayBuffer();
+    const workbook = XLSX.read(buffer, { type: 'array' });
+
+    loadWorkbook(workbook);
+    return true;
+  } catch (error) {
+    console.warn('自动加载题库失败：', error);
+    return false;
+  }
+}
+
+/* ---------- 启动：恢复题库与进度 ---------- */
+async function boot() {
+  syncWrongBookSwitch();
+
+  /* 1. 先检查本机是否已有题库 */
+  let bankRestored = false;
+
+  const bank = await dbGet(BANK_KEY);
+
+  if (bank) {
+    try {
+      if (Array.isArray(bank.listeningRows) && bank.listeningRows.length) {
+        setListeningGroups(bank.listeningRows, { render: false });
+        bankRestored = true;
+      }
+      if (Array.isArray(bank.readingRows) && bank.readingRows.length) {
+        setReadingGroups(bank.readingRows, { render: false });
+        bankRestored = true;
+      }
+      if (bankRestored) updateGroupInfoAfterImport();
+    } catch (error) {
+      console.warn('恢复本机题库失败：', error);
+      bankRestored = false;
+    }
+  }
+
+  /* 2. 本机没有题库 → 读取相对路径的 题库.xlsx */
+  let skipAutoBank = false;
+  try {
+    skipAutoBank = sessionStorage.getItem(SKIP_AUTO_BANK_KEY) === '1';
+    if (skipAutoBank) sessionStorage.removeItem(SKIP_AUTO_BANK_KEY);
+  } catch (error) {
+    /* sessionStorage 不可用则忽略 */
+  }
+
+  let autoLoadedFromUrl = false;
+
+  if (!bankRestored && !skipAutoBank) {
+    $('questionsArea').innerHTML =
+      '<p class="loading-tip">正在读取题库.xlsx ...</p>';
+
+    autoLoadedFromUrl = await loadBankFromUrl(AUTO_BANK_URL);
+    if (autoLoadedFromUrl) bankRestored = true;
+  }
+
+  /* 3. 恢复答题状态、进度、筛选与模式 */
+  const state = autoLoadedFromUrl ? null : await dbGet(STATE_KEY);
+
+  if (state && (listeningGroups.length || readingGroups.length)) {
+    /* 恢复累计用时 */
+    if (typeof state.elapsedMs === 'number') {
+      elapsedMs = state.elapsedMs;
+    }
+
+    if (state.listeningProgress) {
+      LISTENING_TYPES.forEach(type => {
+        if (typeof state.listeningProgress[type] === 'number') {
+          listeningProgress[type] = state.listeningProgress[type];
+        }
+      });
+    }
+
+    if (state.readingProgress) {
+      READING_TYPES.forEach(type => {
+        if (typeof state.readingProgress[type] === 'number') {
+          readingProgress[type] = state.readingProgress[type];
+        }
+      });
+    }
+
+    if (state.listeningTypeFilter && LISTENING_TYPES.includes(state.listeningTypeFilter)) {
+      listeningTypeFilter = state.listeningTypeFilter;
+    }
+
+    if (state.readingTypeFilter && READING_TYPES.includes(state.readingTypeFilter)) {
+      readingTypeFilter = state.readingTypeFilter;
+    }
+
+    applyAnswers(state.answers);
+
+    let mode = state.currentMode === 'reading' ? 'reading' : 'listening';
+
+    if (mode === 'reading' && !readingGroups.length && listeningGroups.length) {
+      mode = 'listening';
+    }
+    if (mode === 'listening' && !listeningGroups.length && readingGroups.length) {
+      mode = 'reading';
+    }
+
+    setMode(mode, false);
+  }
+
+  /* 4. 如果成功恢复了题库，自动折叠导入选项 */
+  if (listeningGroups.length || readingGroups.length) {
+    collapseImportOptions();
+  }
+
+  clampActiveIndex();
+  renderSubtypeTabs();
+  render();
+
+  /* 显示恢复后的累计用时 */
+  updateTimer();
+}
+
+/* 页面切到后台或关闭前保存一次累计用时（兜底，防止丢失） */
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') {
+    saveStateNow();
+  }
+});
+window.addEventListener('beforeunload', () => {
+  saveStateNow();
+});
+
+boot();
+</script>
+</body>
+</html>
