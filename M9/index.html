@@ -363,6 +363,11 @@ button.ghost{background:#f7f9fb}
           <input type="checkbox" id="showText">
           <span class="switch"></span>
         </label>
+        <label class="toggle" id="answerTogglePanel" title="打开后直接显示每道题的正确答案，无需作答">
+          <span>查看答案</span>
+          <input type="checkbox" id="showAnswers">
+          <span class="switch"></span>
+        </label>
       </span>
     </div>
   </div>
@@ -1256,14 +1261,16 @@ function setMode(selectedMode, doRender = true) {
     button.classList.toggle('active', button.dataset.mode === selectedMode);
   });
 
-  $('listeningControls').style.display =
-    selectedMode === 'listening' ? '' : 'none';
+  // 听力控制条始终显示；“查看答案”开关在两种模式下都可用。
+  // 阅读模式下只隐藏播放按钮、语速、听力原文这三个听力专属控件。
+  $('listeningControls').style.display = '';
+  const hideListeningOnly = selectedMode !== 'listening';
+  $('playPause').style.display = hideListeningOnly ? 'none' : '';
+  document.querySelector('.rate-inline').style.display = hideListeningOnly ? 'none' : '';
+  $('showText').closest('.toggle').style.display = hideListeningOnly ? 'none' : '';
 
   renderSubtypeTabs();
-
-  // 每个模式有独立进度；切换后夹到合法范围
   clampActiveIndex();
-
   if (doRender) render();
 }
 
@@ -1409,7 +1416,18 @@ function navigateGroup(delta) {
 
   stopPlay();
 
-  const result = autoConfirmBeforeLeave();
+  /* 查看答案模式：不记录作答状态，也不拦截切题 */
+  let result = null;
+  if (!$('showAnswers').checked) {
+    result = autoConfirmBeforeLeave();
+
+    /* 点击下一题时发现答错：按“确认”的效果显示正确答案并停留本题 */
+    if (delta > 0 && result && result.wrong > 0) {
+      render();
+      return;
+    }
+  }
+
   const nextIndex = activeIndex() + delta;
   const targetButton = delta > 0 ? '下一题' : '上一题';
 
@@ -1434,7 +1452,7 @@ function navigateGroup(delta) {
 
   setActiveIndex(nextIndex);
 
-  const tip = result
+  const tip = delta < 0 && result
     ? { ...result, anchor: targetButton }
     : null;
 
@@ -1531,6 +1549,7 @@ function render(options = null) {
     }
 
     $('listeningPanel').style.display = 'none';
+    $('answerTogglePanel').style.display = viewMode === 'wrong' ? 'none' : '';
     updateStats();
     return;
   }
@@ -1578,7 +1597,8 @@ function render(options = null) {
 
         if (question.selected === key) button.classList.add('selected');
 
-        if (question.result && question.answer === key) {
+        const answerView = $('showAnswers').checked;
+        if ((question.result || answerView) && question.answer === key) {
           button.classList.add('correct');
         }
 
@@ -1587,7 +1607,7 @@ function render(options = null) {
         }
 
         button.onclick = () => {
-          if (question.result) return;
+          if (question.result || $('showAnswers').checked) return;
 
           question.selected = key;
           resetTimerIfNeeded();
@@ -1599,12 +1619,14 @@ function render(options = null) {
 
       block.appendChild(options);
 
-      /* 确认后始终显示答案反馈，与“听力原文”开关无关 */
-      if (question.result) {
+      /* 已确认时显示答题结果；“查看答案”开启时直接显示正确答案 */
+      if (question.result || $('showAnswers').checked) {
         const feedback = document.createElement('div');
         feedback.className = 'feedback';
 
-        if (question.selected === question.answer) {
+        if ($('showAnswers').checked && !question.result) {
+          feedback.textContent = `正确答案：${question.answer}。`;
+        } else if (question.selected === question.answer) {
           feedback.textContent = `正确。答案：${question.answer}。`;
         } else {
           feedback.classList.add('wrong');
@@ -1656,13 +1678,14 @@ function render(options = null) {
 
   const listeningPanel = $('listeningPanel');
 
-  /* “听力原文”开关只控制听力材料面板的显示 */
+  /* “听力原文”开关只控制听力材料面板；查看答案开关独立工作 */
   if (currentMode === 'listening' && $('showText').checked) {
     listeningPanel.style.display = '';
     $('transcript').textContent = group.fullTranscript || '（无听力原文）';
   } else {
     listeningPanel.style.display = 'none';
   }
+  $('answerTogglePanel').style.display = '';
 }
 
 /* ---------- 错题本内：单题播放 ---------- */
@@ -1777,6 +1800,7 @@ function renderWrongBook() {
 
   // 错题本中不使用顶部全局听力面板，原文跟随每道题显示
   $('listeningPanel').style.display = 'none';
+  $('answerTogglePanel').style.display = 'none';
 
   area.innerHTML = '';
 
@@ -1965,6 +1989,10 @@ $('jumpNo').addEventListener('keydown', event => {
 
 /* ---------- 显示听力原文 ---------- */
 $('showText').addEventListener('change', () => {
+  render();
+});
+
+$('showAnswers').addEventListener('change', () => {
   render();
 });
 
